@@ -426,6 +426,7 @@ def lisasens(f, model="SciRDv1", includewd=None, foreground_params=None, use_gpu
     Sens = (AvResp * Proj * T * ALL_m / lisaL) ** 2
 
     if includewd is not None or foreground_params is not None:
+        # Sgal= WDconfusionAE(f, duration=includewd, foreground_params=foreground_params, model=model, use_gpu=use_gpu)
         Sgal = GalConf(f, Tobs=includewd, foreground_params=foreground_params, use_gpu=use_gpu)
         Sens = Sens + Sgal
 
@@ -512,6 +513,7 @@ def noisepsd_XY(f, model="SciRDv1", includewd=None, foreground_params=None):
 
 
 def noisepsd_AE(f, model="SciRDv1", includewd=None, foreground_params=None, use_gpu=False):
+    # breakpoint()
     """
     Compute and return analytic PSD of noise for TDI A and E
      @param frequencydata  numpy array.
@@ -616,12 +618,21 @@ def SGal(fr, pars, use_gpu=False):
         xp = cp
     else:
         xp = np
-    # {{{
+    
+    
+
+    # Amp = pars[0]
+    # alpha = pars[1]
+    # sl1 = pars[2]
+    # kn = pars[3]
+    # sl2 = pars[4]
     Amp = pars[0]
     alpha = pars[1]
-    sl1 = pars[2]
-    kn = pars[3]
-    sl2 = pars[4]
+    sl1 = xp.asarray(pars[2])
+    kn = xp.asarray(pars[3])
+    sl2 = xp.asarray(pars[4])
+    # breakpoint()
+    # fr = xp.asarray(fr)
     Sgal = (
         Amp
         * xp.exp(-(fr ** alpha) * sl1)
@@ -629,6 +640,7 @@ def SGal(fr, pars, use_gpu=False):
         * 0.5
         * (1.0 + xp.tanh(-(fr - kn) * sl2))
     )
+    # print("Sgal", Sgal)
 
     return Sgal
     # }}}
@@ -644,6 +656,7 @@ def GalConf(fr, Tobs=None, foreground_params=None, use_gpu=False):
     day = 86400.0
     month = day * 30.5
     year = 365.25 * 24.0 * 3600.0
+    Tobs = Tobs * year
 
     # Sgal_1d = 2.2e-44*np.exp(-(fr**1.2)*0.9e3)*(fr**(-7./3.))*0.5*(1.0 + np.tanh(-(fr-1.4e-2)*0.7e2))
     # Sgal_3m = 2.2e-44*np.exp(-(fr**1.2)*1.7e3)*(fr**(-7./3.))*0.5*(1.0 + np.tanh(-(fr-4.8e-3)*5.4e2))
@@ -716,6 +729,8 @@ def GalConf(fr, Tobs=None, foreground_params=None, use_gpu=False):
 
     else:
         raise ValueError("Must provide either Tobs or foreground_params.")
+    
+    # breakpoint()
     Sgal_int = SGal(fr, [Amp, alpha, sl1, kn, sl2], use_gpu=use_gpu)
 
     return Sgal_int
@@ -723,6 +738,7 @@ def GalConf(fr, Tobs=None, foreground_params=None, use_gpu=False):
 
 # TODO check it against the old LISA noise
 def WDconfusionX(f, foreground_params=None, duration=None, model="SciRDv1", use_gpu=False):
+    # breakpoint()
     """
     TODO To be described
     """
@@ -743,13 +759,14 @@ def WDconfusionX(f, foreground_params=None, duration=None, model="SciRDv1", use_
     if True: #(
         # model == "Proposal" or model == "SciRDv1" or model == "sangria"
     #):  ## WANRNING: WD should be regenrate for SciRD
-        x = 2.0 * math.pi * lisaLT * f
+        # x = xp.asarray(2.0 * math.pi * lisaLT * f)
+        x = (2.0 * math.pi * lisaLT * f)
+
         t = 4.0 * x ** 2 * xp.sin(x) ** 2
         if duration is not None:
             duration_in = duration * year
         else:
             duration_in = None
-
         Sg_sens = GalConf(f, Tobs=duration_in, foreground_params=foreground_params, use_gpu=use_gpu)
         
         # t = 4 * x**2 * xp.sin(x)**2 * (1.0 if obs == 'X' else 1.5)
@@ -1285,7 +1302,6 @@ def cornish_lisa_psd(f, sky_averaged=False, use_gpu=False):
     PSD obtained from: https://arxiv.org/pdf/1803.01944.pdf
 
     """
-
     if use_gpu:
         xp = cp
     else:

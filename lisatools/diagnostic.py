@@ -29,6 +29,7 @@ def inner_product(
 
     else:
         xp = np
+    # breakpoint()
 
     if df is None and dt is None and f_arr is None:
         raise ValueError("Must provide either df, dt or f_arr keyword arguments.")
@@ -78,8 +79,9 @@ def inner_product(
             freqs = f_arr
 
     # get PSD weighting
+    # breakpoint()
     if isinstance(PSD, str):
-        PSD_arr = get_sensitivity(freqs, sens_fn=PSD, *PSD_args, **PSD_kwargs)
+        PSD_arr = get_sensitivity(freqs, sens_fn=PSD, *PSD_args, **PSD_kwargs,  use_gpu=use_gpu)
 
     elif isinstance(PSD, xp.ndarray):
         PSD_arr = PSD
@@ -171,6 +173,7 @@ def inner_product(
 
 
 def snr(sig1, *args, data=None, use_gpu=False, **kwargs):
+    # breakpoint()
     if use_gpu:
         xp = cp
 
