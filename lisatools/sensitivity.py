@@ -1,5 +1,5 @@
 import warnings
-
+import sys
 import numpy as np
 
 try:
@@ -656,7 +656,8 @@ def GalConf(fr, Tobs=None, foreground_params=None, use_gpu=False):
     day = 86400.0
     month = day * 30.5
     year = 365.25 * 24.0 * 3600.0
-    Tobs = Tobs * year
+    # breakpoint()
+    # Tobs = Tobs * year
 
     # Sgal_1d = 2.2e-44*np.exp(-(fr**1.2)*0.9e3)*(fr**(-7./3.))*0.5*(1.0 + np.tanh(-(fr-1.4e-2)*0.7e2))
     # Sgal_3m = 2.2e-44*np.exp(-(fr**1.2)*1.7e3)*(fr**(-7./3.))*0.5*(1.0 + np.tanh(-(fr-4.8e-3)*5.4e2))
@@ -710,8 +711,12 @@ def GalConf(fr, Tobs=None, foreground_params=None, use_gpu=False):
         # Slope2 = [0.7e2, 5.4e2, 1.3e3, 1.8e3, 1.9e3]
 
         Tmax = 10.0 * year
-        if Tobs > Tmax:
-            print("I do not do extrapolation, Tobs > Tmax:", Tobs, Tmax)
+        # breakpoint()
+        # if Tobs > Tmax:
+        #     print("I do not do extrapolation, Tobs > Tmax:", Tobs, Tmax)
+        #     sys.exit(1)
+        if Tobs < 200:
+            print("Tobs is not in secs:", Tobs)
             sys.exit(1)
 
         # Interpolate
